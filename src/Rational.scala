@@ -10,11 +10,31 @@ class Rational(n: Int, d: Int) {
   // Auxiliary constructor must call another constructor.
   def this(n: Int) = this(n, 1)
 
-  def add(that: Rational): Rational = 
+  def + (that: Rational): Rational =
     new Rational(
       numer * that.denom + that.numer * denom,
       denom * that.denom
     )
+  def + (i: Int): Rational =
+    new Rational(numer + i * denom, denom)
+
+  def - (that: Rational): Rational =
+    new Rational(
+      numer * that.denom - that.numer * denom,
+      denom * that.denom
+    )
+  def - (i: Int): Rational =
+    new Rational(numer - i * denom, denom)
+
+  def * (that: Rational): Rational =
+    new Rational(numer * that.numer, denom * that.denom)
+  def * (i: Int): Rational =
+    new Rational(numer * i, denom)
+
+  def / (that: Rational): Rational =
+    new Rational(numer * that.denom, denom * that.numer)
+  def / (i: Int): Rational =
+    new Rational(numer, denom * i)
 
   def lessThan(that: Rational) =
     this.numer * this.denom < that.numer * that.denom
