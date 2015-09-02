@@ -130,3 +130,94 @@ def approximate(guess: Double): Double =
   if ( isGoodEnough(guess) ) guess
   else approximate( improve(guess) )
 ```
+
+### 名前渡しパラメータ
+
+名前付き引数と混同しないように。これは引数を受け取らない関数をパラメータとして渡す場合に、
+`() =>`という定型記述を省略するための記法(たぶん)。
+例えば外部のフラグで実行の有無を設定できる`assert`のような関数を作る場合、普通に関数を
+渡すなら以下のようになる。
+
+```scala
+var assertionEnabled = true
+
+def myAssert(predicate: () => Boolean) =
+  if (assertionEnabled && ! predicate())
+    throw new AssertionError
+
+// Throw an exception if the flag is on.
+myAssert(() => 2 + 3 < 3)
+```
+
+これでは、上記のような単純なアサーションを書く時でも冗長になってしまう。
+しかし、フラグによる管理をしたいので式の評価はあくまで`myAssert`の中で行う必要がある。
+(式の評価結果を`myAssert`に渡すのでは、フラグに関係なく式が実行されてしまうため
+意味がない)。このような場合に名前渡しパラメータを使うと、それこそJavaの`assert`の
+ように記述できる。
+
+```scala
+var assertionEnabled = true
+
+// '()' is omitted.
+def myAssert(predicate: => Boolean) =
+  if (assertionEnabled && ! predicate)
+    throw new AssertionError
+
+// Throw an exception if the flag is on.
+myAssert(2 + 3 < 3)
+
+// OK.
+myAssert(true)
+```
+
+名前渡しパラメータを使うと、この例でいえば`Boolean`を返す式の評価を、関数内で
+その引数が実際に使用されるまで遅らせる事ができる。これにより、冗長な無名関数の
+記述を排除できる。
+ただし関数を渡す場合は、`myAssert`内で仮引数が評価される度に実行される。
+
+## カリー化
+
+Scalaでは、関数定義において受け取るパラメータリストを増やす事でカリー化された関数を
+定義する。既に定義済みの関数をカリー化したい場合には、アンダースコアによる部分適用を
+使用すればいい。
+
+```scala
+// 通常の関数
+def plainOldSum(x: Int, y: Int) = x + y
+
+// カリー化された関数
+def curriedSum(x: Int)(y: Int) = x + y
+
+println( plainOldSum(1, 2) ) // => 3
+println( curriedSum(1)(2) )  // => 3
+```
+
+カリー化された関数に一部の引数だけを渡す場合は、やはりプレースホルダ記法を用いる。
+この場合は、プレースホルダの前にスペースを入れる必要はない。
+
+```scala
+val onePlus = curriedSum(1)_
+val twoPlus = curriedSum(2)_
+
+println( onePlus(2) ) // => 3
+println( twoPlus(2) ) // => 4
+```
+
+## 波括弧を用いた関数呼び出し
+
+scalaでは、引数を1つだけ受け取る関数の呼び出しに、丸括弧でなく波括弧を使用する事ができる。
+
+```scala
+println( "Hello, Scala!" )
+println{ "Hello, Scala!" }
+```
+
+これを上手く使うと、ユーザー定義関数をまるで組み込みの制御構文のように使用する事ができる。
+つまり波括弧を使用する場合、渡される引数は普通関数オブジェクトとなる。
+複数のパラメータを渡したい場合はカリー化を使えばいい。
+
+```scala
+loanSomeResourceFrom( theFile ) { resource =>
+  resource.doSomething("command")
+}
+```
