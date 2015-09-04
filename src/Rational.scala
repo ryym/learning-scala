@@ -1,5 +1,5 @@
 
-class Rational(n: Int, d: Int) {
+class Rational(n: Int, d: Int) extends Ordered[Rational] {
   require(d != 0) // Defined in Predef object
 
   // Fields must be defined explicitly.
@@ -41,6 +41,10 @@ class Rational(n: Int, d: Int) {
 
   def max(that: Rational) = if (this.lessThan(that)) that else this
 
+  // By this one method, Rational class can provide all comparing methods.
+  def compare(that: Rational) =
+    (this.numer * that.denom) - (that.numer * this.denom)
+
   override def toString = numer + "/" + denom
 
   private def gcd(a: Int, b: Int): Int =
@@ -49,3 +53,8 @@ class Rational(n: Int, d: Int) {
 
 // Implicit conversions (=> chapter 21)
 // implicit def intToRational(x: Int) = new Rational(x)
+
+val half = new Rational(1, 2)
+val third = new Rational(1, 3)
+println( half < third )
+println( half > third )
