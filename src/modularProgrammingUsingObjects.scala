@@ -21,18 +21,41 @@ object FruitSalad extends Recipe(
   "Stir it all together."
 )
 
+// Abstract class to browse foods and recipes.
+abstract class Browser {
+  val database: Database
 
-object SimpleDatabase {
-  def allFoods = List(Apple, Orange, Cream, Sugar)
+  def recipesUsing(food: Food) =
+    database.allRecipes.filter(recipe =>
+      recipe.ingredients.contains(food)
+    )
 
-  def foodNamed(name: String) =
-    allFoods.find(_.name == name)
+  def displayCategory(category: database.FoodCategory) =
+    println(category)
+}
 
-  def allRecipes: List[Recipe] = List(FruitSalad)
-
-  def allCategories = categories
-
+// Abstract class which fetches recipe data.
+abstract class Database {
   case class FoodCategory(name: String, foods: List[Food])
+
+  def allFoods: List[Food]
+  def allRecipes: List[Recipe]
+  def allCategories: List[FoodCategory]
+
+  def foodNamed(name: String): Option[Food] =
+    allFoods.find(_.name == name)
+}
+
+// Multiple subclasses
+
+object SimpleBrowser extends Browser {
+  val database = SimpleDatabase
+}
+
+object SimpleDatabase extends Database {
+  def allFoods = List(Apple, Orange, Cream, Sugar)
+  def allRecipes = List(FruitSalad)
+  def allCategories = categories
 
   private var categories = List(
     FoodCategory("fruits", List(Apple, Orange)),
@@ -40,15 +63,25 @@ object SimpleDatabase {
   )
 }
 
-object SimpleBrowser {
-  def recipesUsing(food: Food) =
-    SimpleDatabase.allRecipes.filter(recipe =>
-      recipe.ingredients.contains(food)
-    )
+object StudentBrowser extends Browser {
+  val database = StudentDatabase
+}
 
-  def displayCategory(category: SimpleDatabase.FoodCategory) =
-    println(category)
+object StudentDatabase extends Database {
+  object FrozenFood extends Food("FrozenFood")
+
+  object HeatItUp extends Recipe(
+    "heat it up",
+    List(FrozenFood),
+    "Microwave the 'food' for 10 minutes."
+  )
+
+  def allFoods = List(FrozenFood)
+  def allRecipes = List(HeatItUp)
+  def allCategories = List(
+    FoodCategory("edible", List(FrozenFood))
+  )
 }
 
 println(SimpleBrowser.recipesUsing(Apple))
-SimpleBrowser.displayCategory( SimpleDatabase.allCategories.head )
+println(StudentBrowser.recipesUsing(Apple))
