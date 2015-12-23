@@ -1,3 +1,5 @@
+/* Modular programming using objects */
+
 abstract class Food(val name: String) {
   override def toString = name
 }
@@ -15,12 +17,6 @@ object Orange extends Food("Orange")
 object Cream  extends Food("Cream")
 object Sugar  extends Food("Sugar")
 
-object FruitSalad extends Recipe(
-  "fruit salad",
-  List(Apple, Orange, Cream, Sugar),
-  "Stir it all together."
-)
-
 // Abstract class to browse foods and recipes.
 abstract class Browser {
   val database: Database
@@ -35,32 +31,48 @@ abstract class Browser {
 }
 
 // Abstract class which fetches recipe data.
-abstract class Database {
-  case class FoodCategory(name: String, foods: List[Food])
-
+abstract class Database extends FoodCategories {
   def allFoods: List[Food]
   def allRecipes: List[Recipe]
-  def allCategories: List[FoodCategory]
 
   def foodNamed(name: String): Option[Food] =
     allFoods.find(_.name == name)
 }
 
-// Multiple subclasses
+trait FoodCategories {
+  case class FoodCategory(name: String, foods: List[Food])
+  def allCategories: List[FoodCategory]
+}
+
+// Multiple databases and browsers
 
 object SimpleBrowser extends Browser {
   val database = SimpleDatabase
 }
 
-object SimpleDatabase extends Database {
-  def allFoods = List(Apple, Orange, Cream, Sugar)
-  def allRecipes = List(FruitSalad)
-  def allCategories = categories
+object SimpleDatabase
+  extends Database
+  with SimpleFoods
+  with SimpleRecipes
 
-  private var categories = List(
-    FoodCategory("fruits", List(Apple, Orange)),
-    FoodCategory("misc", List(Cream, Sugar))
+trait SimpleFoods {
+  object Pear extends Food("Pear")
+  def allFoods = List(Apple, Pear)
+  def allCategories = Nil
+}
+
+trait SimpleRecipes {
+  // Using self-type, SimpleRecipes can access
+  // the members of SimpleFoods. Therefore this requires
+  // a class which extends SimpleRecipes also extends SimpleFoods.
+  this: SimpleFoods =>
+
+  object FruitSalad extends Recipe(
+    "fruit salad",
+    List(Apple, Pear),
+    "Mix it all together."
   )
+  def allRecipes = List(FruitSalad)
 }
 
 object StudentBrowser extends Browser {
@@ -76,8 +88,14 @@ object StudentDatabase extends Database {
     "Microwave the 'food' for 10 minutes."
   )
 
+  object ApplePie extends Recipe(
+    "apple pie",
+    List(Apple, Sugar),
+    "I don't know!"
+  )
+
   def allFoods = List(FrozenFood)
-  def allRecipes = List(HeatItUp)
+  def allRecipes = List(HeatItUp, ApplePie)
   def allCategories = List(
     FoodCategory("edible", List(FrozenFood))
   )
@@ -85,3 +103,25 @@ object StudentDatabase extends Database {
 
 println(SimpleBrowser.recipesUsing(Apple))
 println(StudentBrowser.recipesUsing(Apple))
+
+object GotApples {
+  def showRecipesFrom(database: String) {
+    val db: Database =
+      if (database == "simple")
+        SimpleDatabase
+      else
+        StudentDatabase
+
+    // Define a browser with a database assigned dynamically.
+    object browser extends Browser {
+      val database = db
+    }
+
+    val apple = SimpleDatabase.foodNamed("Apple").get
+    for (recipe <- browser.recipesUsing(apple))
+      println(recipe)
+  }
+}
+
+GotApples.showRecipesFrom("simple")
+GotApples.showRecipesFrom("student")
