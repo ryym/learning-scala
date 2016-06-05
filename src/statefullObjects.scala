@@ -15,7 +15,7 @@ class Time2 {
   def minute_(x: Int) { m = x}
 }
 
-
+// https://ja.wikipedia.org/wiki/加算器
 abstract class Simulation {
   // A type parameter (see chapter 20)
   type Action = () => Unit
