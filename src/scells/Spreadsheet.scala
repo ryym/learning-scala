@@ -1,6 +1,7 @@
 package scells
 
 import swing._
+import event._
 
 class Spreadsheet(val height: Int, val width: Int) extends ScrollPane {
   val table = new Table(height, width) {
@@ -27,6 +28,12 @@ class Spreadsheet(val height: Int, val width: Int) extends ScrollPane {
     def userData(row: Int, column: Int): String = {
       val v = this(row, column) // table.apply(row, column)
       if (v == null) "" else v.toString
+    }
+
+    reactions += {
+      case TableUpdated(table, rows, column) =>
+        for (row <- rows)
+          cells(row)(column).parse(userData(row, column))
     }
   }
 
