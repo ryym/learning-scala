@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+scalac *.scala
+test $? -eq 0 && scala scells.Main
+
