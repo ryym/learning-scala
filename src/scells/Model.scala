@@ -8,7 +8,7 @@ class Model(val height: Int, val width: Int)
 
   case class Cell(row: Int, column: Int) {
     var formula: Formula = Empty
-    def value = evaluate(formula)
+    var value = evaluate(formula)
 
     // 式の評価結果を文字列として返す。
     override def toString = formula match {
@@ -18,6 +18,7 @@ class Model(val height: Int, val width: Int)
 
     def parse(input: String): Unit = {
       formula = FormulaParsers.parse(input)
+      value = evaluate(formula)
     }
   }
 
