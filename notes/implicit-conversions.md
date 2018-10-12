@@ -72,3 +72,12 @@ Scalaコンパイラは型変換できないコードに出くわすと、エラ
 この可視境界を使用してメソッドを定義すれば、`Int`などの型でも受け取れるようになる。当然、メソッド内部で明示的に
 `Ordered`へ変換するような処理は必要ない([例](../src/implicitParameters.scala))。
 
+## 追記: Scala 2.10 から暗黙のクラスが追加された
+
+<http://docs.scala-lang.org/overviews/core/implicit-classes.html>
+
+上記ドキュメントがわかりやすい。用途のイメージとしては、既存のクラスを安全に拡張する
+モンキーパッチのような感じ？ ただしそのクラスに直接メソッドを追加するのではなく、
+そのクラスのインスタンスをメンバーとして持ち、ラッパーメソッドを持つクラスに
+暗黙的に変換できる機構を提供してくれる。
+[文字列の補間](http://docs.scala-lang.org/ja/overviews/core/string-interpolation.html)でも使用されているっぽい。

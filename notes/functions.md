@@ -221,3 +221,15 @@ loanSomeResourceFrom( theFile ) { resource =>
   resource.doSomething("command")
 }
 ```
+
+## 追記: クロージャ(無名関数)内では`return`を使用できない
+
+<http://stackoverflow.com/questions/17754976/scala-return-statements-in-anonymous-functions>
+
+コレクションの`foldLeft`などに渡すクロージャで、条件に応じてループをスキップしようとしても
+`return`は使えない。使うとそのクロージャだけでなく、その外側の名前を持ったメソッド自体から抜け出してしまう。
+`return`は関数というより、クラスやメソッドに紐付いた構文と考えるべきっぽい。
+また大抵の言語にはある`break`処理も意図的にしづらくなっている。これらを使うとコントロールフローがわかりにくく
+なるから、なるべく使わずに済まそうという感じ？
+
+<http://stackoverflow.com/questions/2742719/how-do-i-break-out-of-a-loop-in-scala>
